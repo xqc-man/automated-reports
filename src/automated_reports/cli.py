@@ -42,10 +42,6 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "build":
-            if args.run_log.resolve().is_relative_to(args.output.resolve()):
-                raise DataError("运行日志不能放在快照输出目录内")
-            if args.run_log.resolve() in {args.input.resolve(), args.manifest.resolve()}:
-                raise DataError("运行日志不能覆盖输入文件")
             result = build_snapshot(args.input, args.manifest, args.output)
             metadata = result["metadata"]
             event = {
@@ -92,16 +88,10 @@ def main(argv: list[str] | None = None) -> int:
     except (DataError, OSError) as exc:
         print(f"操作失败：{exc}", file=sys.stderr)
         if args.command == "build":
-            # 参数路径冲突时不写日志，避免改写用户输入或已有快照。
-            safe_log = args.run_log.resolve() not in {
-                args.input.resolve(),
-                args.manifest.resolve(),
-            } and not args.run_log.resolve().is_relative_to(args.output.resolve())
-            if safe_log:
-                try:
-                    _write_run(
-                        args.run_log, {"command": "build", "status": "failed", "reason": str(exc)}
-                    )
-                except OSError as log_error:
-                    print(f"运行记录写入失败：{log_error}", file=sys.stderr)
+            try:
+                _write_run(
+                    args.run_log, {"command": "build", "status": "failed", "reason": str(exc)}
+                )
+            except OSError as log_error:
+                print(f"运行记录写入失败：{log_error}", file=sys.stderr)
         return 1

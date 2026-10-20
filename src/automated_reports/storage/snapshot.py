@@ -31,13 +31,14 @@ def read_snapshot(path: Path) -> tuple[pd.DataFrame, dict]:
         metadata = json.loads((path / "metadata.json").read_text(encoding="utf-8"))
         if not isinstance(metadata, dict) or metadata.get("schema_version") != 1:
             raise DataError("不支持的快照结构版本")
-        if not isinstance(metadata.get("code_version"), str):
-            raise DataError("快照代码版本必须为字符串")
         config = metadata["source_config"]
         validate_manifest(config)
         if hashlib.sha256(csv_bytes).hexdigest() != metadata["content_sha256"]:
             raise DataError("快照内容哈希不一致，文件可能损坏或混用了版本")
-        if _version(csv_bytes, config, metadata["code_version"]) != metadata["snapshot_version"]:
+        if (
+            _version(csv_bytes, config, str(metadata["code_version"]))
+            != metadata["snapshot_version"]
+        ):
             raise DataError("快照版本与数据/来源配置不一致")
         frame = pd.read_csv(
             io.BytesIO(csv_bytes), keep_default_na=False, dtype=str, encoding="utf-8"

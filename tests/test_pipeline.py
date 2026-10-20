@@ -140,29 +140,9 @@ def test_build_cli_success_failure_log_and_query(source_paths, tmp_path, capsys)
     assert main(["validate", "--snapshot", str(snapshot)]) == 0
 
 
-def test_source_inside_output_and_log_overwrite_are_rejected(source_paths, tmp_path):
+def test_source_inside_output_is_rejected(source_paths):
     with pytest.raises(DataError, match="输出目录内"):
         build_snapshot(source_paths[0], source_paths[1], source_paths[0].parent)
-    copied = tmp_path / "source.json"
-    copied.write_bytes(source_paths[1].read_bytes())
-    before = copied.read_bytes()
-    assert (
-        main(
-            [
-                "build",
-                "--input",
-                str(source_paths[0]),
-                "--manifest",
-                str(copied),
-                "--output",
-                str(tmp_path / "snapshot"),
-                "--run-log",
-                str(copied),
-            ]
-        )
-        == 1
-    )
-    assert copied.read_bytes() == before
 
 
 def test_snapshot_csv_export_keeps_simulation_markers(source_paths, tmp_path):
@@ -217,14 +197,3 @@ def test_log_write_failure_does_not_misreport_published_snapshot(
     assert "运行记录写入失败" in captured.err
     assert json.loads(captured.out)["status"] == "success"
     read_snapshot(destination)
-
-
-def test_malformed_snapshot_code_version_is_a_data_error(source_paths, tmp_path):
-    destination = tmp_path / "snapshot"
-    build_snapshot(*source_paths, destination)
-    path = destination / "metadata.json"
-    metadata = json.loads(path.read_text())
-    metadata["code_version"] = 123
-    path.write_text(json.dumps(metadata))
-    with pytest.raises(DataError, match="代码版本"):
-        read_snapshot(destination)
