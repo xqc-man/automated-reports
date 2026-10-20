@@ -178,3 +178,18 @@ def test_quarterly_yoy_is_four_quarters(sample):
     normalized, _ = normalize(frame, manifest)
     result = calculate(normalized, manifest)
     assert result_row(result, "sales_yoy", "2024-01-01").value == pytest.approx(0.5)
+
+
+def test_yoy_change_and_negative_current_value(sample):
+    frame, manifest = sample
+    normalized, _ = normalize(frame, manifest)
+    result = calculate(normalized, manifest)
+    assert result_row(result, "sales_yoy_change", "2024-01-01").value == 50
+    frame.loc[
+        (frame.metric_id == "sales_amount") & (frame.period_start == "2024-01-01"), "value"
+    ] = "-50"
+    normalized, _ = normalize(frame, manifest)
+    result = calculate(normalized, manifest)
+    # 基期为正、本期为负时增长率仍有意义，正常计算。
+    assert result_row(result, "sales_yoy", "2024-01-01").value == pytest.approx(-1.5)
+    assert result_row(result, "sales_yoy_change", "2024-01-01").value == -150

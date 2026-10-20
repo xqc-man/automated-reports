@@ -12,6 +12,7 @@ DERIVED_METRICS = {
     "sales_period_growth": ("ratio", "sales_amount / previous_period(sales_amount) - 1"),
     "sales_yoy": ("ratio", "sales_amount / previous_year(sales_amount) - 1"),
     "sales_change": ("currency", "sales_amount - previous_period(sales_amount)"),
+    "sales_yoy_change": ("currency", "sales_amount - previous_year(sales_amount)"),
     "profit_change": ("currency", "net_profit - previous_period(net_profit)"),
 }
 INPUT_COLUMNS = [

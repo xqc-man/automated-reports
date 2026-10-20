@@ -45,8 +45,6 @@ def calculate(frame: pd.DataFrame, manifest: dict) -> pd.DataFrame:
                 status, reason = "not_comparable", "zero_denominator"
             elif operation == "growth" and right < 0:
                 status, reason = "not_comparable", "negative_baseline"
-            elif operation == "growth" and left < 0:
-                status, reason = "not_comparable", "negative_current_value"
             elif operation == "difference":
                 value = left - right
             else:
@@ -84,10 +82,10 @@ def calculate(frame: pd.DataFrame, manifest: dict) -> pd.DataFrame:
                 derive("average_order_value", sales, [sales, orders], "ratio")
             last_sales = lookup.get(("sales_amount", previous))
             derive("sales_period_growth", sales, [sales, last_sales], "growth")
-            derive(
-                "sales_yoy", sales, [sales, lookup.get(("sales_amount", previous_year))], "growth"
-            )
+            last_year_sales = lookup.get(("sales_amount", previous_year))
+            derive("sales_yoy", sales, [sales, last_year_sales], "growth")
             derive("sales_change", sales, [sales, last_sales], "difference")
+            derive("sales_yoy_change", sales, [sales, last_year_sales], "difference")
         profit = lookup.get(("net_profit", start))
         if profit is not None:
             derive(
