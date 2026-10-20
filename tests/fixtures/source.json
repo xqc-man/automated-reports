@@ -1,0 +1,17 @@
+{
+  "case_id": "fixture-shop",
+  "case_name": "固定测试商店（虚构）",
+  "data_type": "synthetic",
+  "frequency": "monthly",
+  "license": "本项目测试材料，可用于功能演示",
+  "display_window": {
+    "start": "2024-01-01",
+    "end": "2024-06-30"
+  },
+  "sources": {
+    "fixture-source": {
+      "url": null,
+      "evidence": "tests/fixtures/input.csv；人工定义的固定模拟值，用于验证计算"
+    }
+  }
+}

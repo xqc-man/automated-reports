@@ -1,0 +1,17 @@
+{
+  "case_id": "synthetic-shop",
+  "case_name": "模拟商店（虚构）",
+  "data_type": "synthetic",
+  "frequency": "monthly",
+  "license": "本项目生成的模拟数据，可用于功能演示",
+  "display_window": {
+    "start": "2024-01-01",
+    "end": "2024-12-31"
+  },
+  "sources": {
+    "synthetic-generator": {
+      "url": null,
+      "evidence": "scripts/generate_synthetic.py；固定随机种子 20261020；全部为虚构数据"
+    }
+  }
+}
