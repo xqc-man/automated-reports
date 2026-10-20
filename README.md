@@ -8,16 +8,14 @@
 
 环境：Python 3.12、[uv](https://docs.astral.sh/uv/getting-started/installation/)。依赖通过 `uv.lock` 锁定，无需 API 密钥。
 
-当前机器已将 uv 安装到本项目 `.tools/uv/bin/`。在 macOS 终端执行以下命令，PATH 设置仅对当前终端生效：
+先按 uv 官方文档安装 uv，然后在仓库根目录执行：
 
 ```bash
-cd /Users/xuqucheng/projects/自动化报表agent
-export PATH="$PWD/.tools/uv/bin:$PATH"
-export UV_CACHE_DIR="$PWD/.uv-cache"
+cd automated-reports
 uv sync --locked
 ```
 
-其他机器先安装 uv，将 `cd` 改为实际检出路径；已安装 uv 时可省略 PATH 行。`.tools/` 和虚拟环境不会提交 Git。首次安装需要网络，之后下列数据流程不访问网络。`.env.example` 提供配置说明，本版本不读取 `.env`，路径通过命令行参数指定。
+`cd` 后面换成你实际克隆或存放项目的目录。首次安装需要网络，之后下列数据流程不访问网络。`.env.example` 提供配置说明，本版本不读取 `.env`，路径通过命令行参数指定。
 
 ## 生成快照
 
