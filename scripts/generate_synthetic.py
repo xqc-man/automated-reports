@@ -7,6 +7,7 @@ import random
 from pathlib import Path
 
 SEED = 20261020
+SEASONALITY = [0.92, 0.88, 0.97, 1.0, 1.02, 1.05, 0.98, 0.97, 1.02, 1.04, 1.12, 1.2]
 ROOT = Path(__file__).resolve().parents[1] / "data" / "synthetic"
 COLUMNS = [
     "case_id",
@@ -33,9 +34,9 @@ def generate() -> None:
             f"{year}-{month:02d}-01",
             f"{year}-{month:02d}-{calendar.monthrange(year, month)[1]}",
         )
-        sales = 10000 + index * 350 + rng.randint(-600, 600)
-        if index in {0, 1}:
-            sales = (0, -100)[index]
+        customers = round((600 + index * 15) * SEASONALITY[month - 1] + rng.randint(-20, 20))
+        orders = round(customers * rng.uniform(1.25, 1.35))
+        sales = round(orders * (120 + index * 0.5 + rng.uniform(-4, 4)))
         values = {
             "sales_amount": (
                 sales,
@@ -43,19 +44,18 @@ def generate() -> None:
                 "CNY",
                 "虚构样本销售额，含退款调整，不代表财务营收",
             ),
-            "orders_count": (
-                0 if index in {0, 17} else 80 + index * 4,
-                "count",
-                "",
-                "虚构有效订单数，非商品行数",
+            "orders_count": (orders, "count", "", "虚构有效订单数，非商品行数"),
+            "active_customers": (customers, "count", "", "虚构期间去重客户数"),
+            "net_profit": (
+                round(sales * 0.18 - 9000),
+                "currency",
+                "CNY",
+                "虚构净利润：销售额的 18% 减固定成本",
             ),
-            "active_customers": (60 + index * 3, "count", "", "虚构期间去重客户数"),
-            "net_profit": (-500 + index * 100, "currency", "CNY", "虚构净利润，仅验证正负数计算"),
         }
         for metric_id, (value, unit, currency, definition) in values.items():
-            if index == 16 and metric_id == "active_customers":
-                continue  # 故意遗漏一个期间，验证补为缺失，不能补零。
-            is_missing = index == 5 and metric_id == "sales_amount"
+            # 保留一个缺失示例，用于展示缺失提示；其余边界场景只在 tests/fixtures 中覆盖。
+            is_missing = (year, month) == (2024, 5) and metric_id == "active_customers"
             rows.append(
                 {
                     "case_id": "synthetic-shop",
@@ -72,7 +72,6 @@ def generate() -> None:
                     "missing_reason": "synthetic_missing_example" if is_missing else "",
                 }
             )
-    rows.append(rows[10].copy())  # 完全重复行：导入后应去重。
     manifest = {
         "case_id": "synthetic-shop",
         "case_name": "模拟商店（虚构）",
